@@ -46,12 +46,36 @@ init flags =
     )
 
 
+viewRange : Maybe Date.Date -> Maybe Date.Date -> Html msg
+viewRange start end =
+    case ( start, end ) of
+        ( Nothing, Nothing ) ->
+            h1 [] [ text "Pick dates" ]
+
+        ( Just s, Nothing ) ->
+            h1 [] [ text <| formatDate s ++ " - Pick end date" ]
+
+        ( Nothing, Just e ) ->
+            h1 [] [ text <| "Pick start date - " ++ formatDate e ]
+
+        ( Just s, Just e ) ->
+            h1 [] [ text <| formatDate s ++ " - " ++ formatDate e ]
+
+formatDate : Date.Date -> String
+formatDate date =
+    Date.format "MMM dd, yyyy" date
+
 view : Model -> Html Msg
 view model =
-    DateRangePicker.viewRangePicker
-        (ChangeCreatedOnRange DateRangePicker.ChangingLowerBound)
-        (ChangeCreatedOnRange DateRangePicker.ChangingUpperBound)
-        model.createdOnPicker
+    div []
+        [ viewRange
+            model.createdOnPicker.startDate
+            model.createdOnPicker.endDate
+        , DateRangePicker.viewRangePicker
+            (ChangeCreatedOnRange DateRangePicker.ChangingLowerBound)
+            (ChangeCreatedOnRange DateRangePicker.ChangingUpperBound)
+            model.createdOnPicker
+        ]
 
 
 main =

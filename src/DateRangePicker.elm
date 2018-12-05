@@ -43,33 +43,14 @@ init =
       -- TODO: better as a record?
     )
 
-
-viewRange : Maybe Date.Date -> Maybe Date.Date -> Html msg
-viewRange start end =
-    case ( start, end ) of
-        ( Nothing, Nothing ) ->
-            h1 [] [ text "Pick dates" ]
-
-        ( Just s, Nothing ) ->
-            h1 [] [ text <| formatDate s ++ " - Pick end date" ]
-
-        ( Nothing, Just e ) ->
-            h1 [] [ text <| "Pick start date - " ++ formatDate e ]
-
-        ( Just s, Just e ) ->
-            h1 [] [ text <| formatDate s ++ " - " ++ formatDate e ]
-
-
 viewRangePicker : (DatePicker.Msg -> msg) -> (DatePicker.Msg -> msg) -> DateRangePicker -> Html msg
 viewRangePicker onChangeStartDate onChangeEndDate range =
     div []
-        [ viewRange range.startDate range.endDate
-        , DatePicker.view range.startDate (startSettings range.endDate) range.startDatePicker
+        [ DatePicker.view range.startDate (startSettings range.endDate) range.startDatePicker
             |> Html.map onChangeStartDate
         , DatePicker.view range.endDate (endSettings range.startDate) range.endDatePicker
             |> Html.map onChangeEndDate
         ]
-
 
 updateRangePicker : DateRangeField -> DatePicker.Msg -> DateRangePicker -> DateRangePicker
 updateRangePicker field innerMsg target =
@@ -158,8 +139,3 @@ endSettings startDate =
                             || commonSettings.isDisabled d
     in
     { commonSettings | isDisabled = isDisabled }
-
-
-formatDate : Date.Date -> String
-formatDate date =
-    Date.format "MMM dd, yyyy" date
