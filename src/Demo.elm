@@ -4,50 +4,49 @@ import DatePicker
 import Html exposing (..)
 
 type alias Flags = {}
-type alias Model =
+type alias DateRange =
     { startDate: Maybe Date.Date
     , startDatePicker: DatePicker.DatePicker
     , endDate: Maybe Date.Date
     , endDatePicker: DatePicker.DatePicker
     }
 
+type alias Model =
+    { createdOnPicker: DateRange }
+
+type DateRangeField
+    = ChangingStartDate
+    | ChangingEndDate
+
 type Msg 
-    = ToStartDatePicker DatePicker.Msg
-    | ToEndDatePicker DatePicker.Msg
+    = ChangeCreatedOnRange DateRangeField DatePicker.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        ToStartDatePicker innerMsg ->
+        ChangeCreatedOnRange field innerMsg ->
             let
+                picker = if field == ChangingStartDate then model.createdOnPicker.startDatePicker else model.createdOnPicker.endDatePicker
+                settings = if field == ChangingStartDate then (startSettings model.createdOnPicker.endDate) else (endSettings model.createdOnPicker.startDate)
                 (newPicker, dateEvent) =
-                    DatePicker.update (startSettings model.endDate) innerMsg model.startDatePicker
+                    DatePicker.update settings innerMsg picker
                 newDate =
                     case dateEvent of
                         DatePicker.Picked changedDate ->
                             Just changedDate
                         _ ->
-                            model.startDate
+                            if field == ChangingStartDate then
+                                model.createdOnPicker.startDate
+                            else
+                                model.createdOnPicker.endDate
+                oldPickerState = model.createdOnPicker
+                freshPickerState =
+                    if field == ChangingStartDate then
+                        { oldPickerState | startDate = newDate, startDatePicker = newPicker }
+                    else
+                        { oldPickerState | endDate = newDate, endDatePicker = newPicker }
             in
-                ({ model
-                    | startDate = newDate 
-                    , startDatePicker = newPicker
-                }, Cmd.none )
-        ToEndDatePicker innerMsg ->
-            let
-                (newPicker, dateEvent) =
-                    DatePicker.update (endSettings model.startDate) innerMsg model.endDatePicker
-                newDate =
-                    case dateEvent of
-                        DatePicker.Picked changedDate ->
-                            Just changedDate
-                        _ ->
-                            model.startDate
-            in
-                ({ model
-                    | endDate = newDate 
-                    , endDatePicker = newPicker
-                }, Cmd.none )
+                ({ model | createdOnPicker = freshPickerState }, Cmd.none)
 
 commonSettings : DatePicker.Settings
 commonSettings =
@@ -91,25 +90,31 @@ init flags =
         (startDatePicker, startDatePickerCmd) = DatePicker.init
         (endDatePicker, endDatePickerCmd) = DatePicker.init
     in
-        ({ startDate = Nothing
-        , startDatePicker = startDatePicker
-        , endDate = Nothing
-        , endDatePicker = endDatePicker
+        ({ createdOnPicker =
+            { startDate = Nothing
+            , startDatePicker = startDatePicker
+            , endDate = Nothing
+            , endDatePicker = endDatePicker
+            }
         },
         Cmd.batch
-            [ Cmd.map ToStartDatePicker startDatePickerCmd
-            , Cmd.map ToEndDatePicker endDatePickerCmd
+            [ Cmd.map (ChangeCreatedOnRange ChangingStartDate) startDatePickerCmd
+            , Cmd.map (ChangeCreatedOnRange ChangingEndDate) endDatePickerCmd
             ]
         )
 
 view : Model -> Html Msg
 view model =
+    viewPicker model.createdOnPicker
+
+viewPicker : DateRange -> Html Msg
+viewPicker range =
     div []
-        [ viewRange model.startDate model.endDate
-        , DatePicker.view model.startDate (startSettings model.endDate) model.startDatePicker
-            |> Html.map ToStartDatePicker
-        , DatePicker.view model.endDate (endSettings model.startDate) model.endDatePicker
-            |> Html.map ToEndDatePicker
+        [ viewRange range.startDate range.endDate
+        , DatePicker.view range.startDate (startSettings range.endDate) range.startDatePicker
+            |> Html.map (ChangeCreatedOnRange ChangingStartDate)
+        , DatePicker.view range.endDate (endSettings range.startDate) range.endDatePicker
+            |> Html.map (ChangeCreatedOnRange ChangingEndDate)
         ]
 
 viewRange : Maybe Date.Date -> Maybe Date.Date -> Html Msg
