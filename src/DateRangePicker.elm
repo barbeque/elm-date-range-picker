@@ -109,14 +109,17 @@ updateRangePicker field innerMsg target =
     else
         { target | endDate = newDate, endDatePicker = newPicker }
 
-
-
--- Encapsulated these settings
-
-
+-- Private settings
 commonSettings : DatePicker.Settings
 commonSettings =
-    DatePicker.defaultSettings
+    let
+        settings = DatePicker.defaultSettings
+    in
+        { settings
+            | inputClassList = [ ("form-control", True) ]
+            , placeholder = "mm/dd/yyyy"
+            , dateFormatter = Date.format "MM/dd/yyyy"
+        }
 
 
 startSettings : Maybe Date.Date -> DatePicker.Settings
@@ -137,7 +140,7 @@ startSettings endDate =
 
         -- ????
     in
-    { commonSettings | placeholder = "Pick a Start Date", isDisabled = isDisabled }
+    { commonSettings | isDisabled = isDisabled }
 
 
 endSettings : Maybe Date.Date -> DatePicker.Settings
@@ -154,7 +157,7 @@ endSettings startDate =
                             < Date.toRataDie date
                             || commonSettings.isDisabled d
     in
-    { commonSettings | placeholder = "Pick an End Date", isDisabled = isDisabled }
+    { commonSettings | isDisabled = isDisabled }
 
 
 formatDate : Date.Date -> String
