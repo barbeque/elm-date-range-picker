@@ -26,19 +26,15 @@ update msg model =
 init : Flags -> (Model, Cmd Msg)
 init flags =
     let
-        (startDatePicker, startDatePickerCmd) = DatePicker.init
-        (endDatePicker, endDatePickerCmd) = DatePicker.init
+        (createdOnPicker, updateCreatedOnStartCmd, updateCreatedOnEndCmd) =
+            DateRangePicker.init
     in
-        ({ createdOnPicker =
-            { startDate = Nothing
-            , startDatePicker = startDatePicker
-            , endDate = Nothing
-            , endDatePicker = endDatePicker
-            }
+        ({ createdOnPicker = createdOnPicker
         },
         Cmd.batch
-            [ Cmd.map (ChangeCreatedOnRange DateRangePicker.ChangingStartDate) startDatePickerCmd
-            , Cmd.map (ChangeCreatedOnRange DateRangePicker.ChangingEndDate) endDatePickerCmd
+            -- ugly, but it's the best i can think of right now
+            [ Cmd.map (ChangeCreatedOnRange DateRangePicker.ChangingStartDate) updateCreatedOnStartCmd
+            , Cmd.map (ChangeCreatedOnRange DateRangePicker.ChangingEndDate) updateCreatedOnEndCmd
             ]
         )
 

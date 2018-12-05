@@ -3,6 +3,7 @@ module DateRangePicker exposing
     , DateRangePicker
     , updateRangePicker
     , viewRangePicker
+    , init
     )
 
 import Date exposing (Date)
@@ -20,6 +21,21 @@ type alias DateRangePicker =
     , endDate: Maybe Date
     , endDatePicker: DatePicker
     }
+
+init : (DateRangePicker, (Cmd DatePicker.Msg), (Cmd DatePicker.Msg))
+init =
+    let
+        (startDatePicker, startDatePickerCmd) = DatePicker.init
+        (endDatePicker, endDatePickerCmd) = DatePicker.init
+    in
+        ({ startDate = Nothing
+        , startDatePicker = startDatePicker
+        , endDate = Nothing
+        , endDatePicker = endDatePicker
+        },
+        startDatePickerCmd,
+        endDatePickerCmd -- TODO: better as a record?
+        )
 
 viewRange : Maybe Date.Date -> Maybe Date.Date -> Html msg
 viewRange start end =
