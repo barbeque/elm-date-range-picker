@@ -21,30 +21,35 @@ type DateRangeField
 type Msg 
     = ChangeCreatedOnRange DateRangeField DatePicker.Msg
 
+updateRange : DateRangeField -> DatePicker.Msg -> DateRange -> DateRange
+updateRange field innerMsg target =
+    let
+        picker = if field == ChangingStartDate then target.startDatePicker else target.endDatePicker
+        settings = if field == ChangingStartDate then (startSettings target.endDate) else (endSettings target.startDate)
+        (newPicker, dateEvent) =
+            DatePicker.update settings innerMsg picker
+        newDate =
+            case dateEvent of
+                DatePicker.Picked changedDate ->
+                    Just changedDate
+                _ ->
+                    if field == ChangingStartDate then
+                        target.startDate
+                    else
+                        target.endDate
+    in
+        if field == ChangingStartDate then
+            { target | startDate = newDate, startDatePicker = newPicker }
+        else
+            { target | endDate = newDate, endDatePicker = newPicker }
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         ChangeCreatedOnRange field innerMsg ->
             let
-                picker = if field == ChangingStartDate then model.createdOnPicker.startDatePicker else model.createdOnPicker.endDatePicker
-                settings = if field == ChangingStartDate then (startSettings model.createdOnPicker.endDate) else (endSettings model.createdOnPicker.startDate)
-                (newPicker, dateEvent) =
-                    DatePicker.update settings innerMsg picker
-                newDate =
-                    case dateEvent of
-                        DatePicker.Picked changedDate ->
-                            Just changedDate
-                        _ ->
-                            if field == ChangingStartDate then
-                                model.createdOnPicker.startDate
-                            else
-                                model.createdOnPicker.endDate
-                oldPickerState = model.createdOnPicker
                 freshPickerState =
-                    if field == ChangingStartDate then
-                        { oldPickerState | startDate = newDate, startDatePicker = newPicker }
-                    else
-                        { oldPickerState | endDate = newDate, endDatePicker = newPicker }
+                    updateRange field innerMsg model.createdOnPicker
             in
                 ({ model | createdOnPicker = freshPickerState }, Cmd.none)
 
