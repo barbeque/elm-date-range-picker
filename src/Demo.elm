@@ -40,8 +40,8 @@ init flags =
       }
     , Cmd.batch
         -- ugly, but it's the best i can think of right now
-        [ Cmd.map (ChangeCreatedOnRange DateRangePicker.ChangingStartDate) updateCreatedOnStartCmd
-        , Cmd.map (ChangeCreatedOnRange DateRangePicker.ChangingEndDate) updateCreatedOnEndCmd
+        [ Cmd.map (ChangeCreatedOnRange DateRangePicker.ChangingLowerBound) updateCreatedOnStartCmd
+        , Cmd.map (ChangeCreatedOnRange DateRangePicker.ChangingUpperBound) updateCreatedOnEndCmd
         ]
     )
 
@@ -49,8 +49,8 @@ init flags =
 view : Model -> Html Msg
 view model =
     DateRangePicker.viewRangePicker
-        (ChangeCreatedOnRange DateRangePicker.ChangingStartDate)
-        (ChangeCreatedOnRange DateRangePicker.ChangingEndDate)
+        (ChangeCreatedOnRange DateRangePicker.ChangingLowerBound)
+        (ChangeCreatedOnRange DateRangePicker.ChangingUpperBound)
         model.createdOnPicker
 
 

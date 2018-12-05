@@ -12,8 +12,8 @@ import Html exposing (..)
 
 
 type DateRangeField
-    = ChangingStartDate
-    | ChangingEndDate
+    = ChangingLowerBound
+    | ChangingUpperBound
 
 
 type alias DateRangePicker =
@@ -75,14 +75,14 @@ updateRangePicker : DateRangeField -> DatePicker.Msg -> DateRangePicker -> DateR
 updateRangePicker field innerMsg target =
     let
         picker =
-            if field == ChangingStartDate then
+            if field == ChangingLowerBound then
                 target.startDatePicker
 
             else
                 target.endDatePicker
 
         settings =
-            if field == ChangingStartDate then
+            if field == ChangingLowerBound then
                 startSettings target.endDate
 
             else
@@ -97,13 +97,13 @@ updateRangePicker field innerMsg target =
                     Just changedDate
 
                 _ ->
-                    if field == ChangingStartDate then
+                    if field == ChangingLowerBound then
                         target.startDate
 
                     else
                         target.endDate
     in
-    if field == ChangingStartDate then
+    if field == ChangingLowerBound then
         { target | startDate = newDate, startDatePicker = newPicker }
 
     else
